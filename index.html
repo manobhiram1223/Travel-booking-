@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EasyTrip Booking</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #e0f7fa, #fce4ec);
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0077cc;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #0077cc;
+      color: white;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .price-breakdown {
+      background: #e3f2fd;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+    .chatbot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 350px;
+      height: 450px;
+      background: #ffffff;
+      border: 2px solid #0077cc;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chatbot-header {
+      background-color: #0077cc;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+    }
+    .chatbot-body {
+      flex-grow: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+    .chatbot-footer {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    .chatbot-footer input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      border-top-left-radius: 8px;
+    }
+    .chatbot-footer button {
+      background: #0077cc;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-top-right-radius: 8px;
+    }
+    .chat-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
+      cursor: pointer;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>EasyTrip Booking</h2>
+
+    <label for="transport">Choose Transport</label>
+    <select id="transport">
+      <option value="">-- Select --</option>
+      <option value="bus">Bus</option>
+      <option value="train">Train</option>
+      <option value="plane">Airplane</option>
+    </select>
+
+    <label for="destination">Destination</label>
+    <select id="destination">
+      <option value="">-- Select --</option>
+      <option value="paris">Paris</option>
+      <option value="newyork">New York</option>
+      <option value="tokyo">Tokyo</option>
+    </select>
+
+    <label for="travelers">Number of Travelers</label>
+    <input type="number" id="travelers" min="1" value="1">
+
+    <div class="price-breakdown" id="priceSection" style="display:none;">
+      <h4>Price Breakdown</h4>
+      <p id="basePrice"></p>
+      <p id="taxes"></p>
+      <p><strong id="totalPrice"></strong></p>
+    </div>
+
+    <button onclick="calculatePrice()">Next</button>
+    <button onclick="goToSuggestions()">Continue</button>
+  </div>
+
+  <button class="chat-toggle" onclick="toggleChatbot()">💬</button>
+
+  <div class="chatbot" id="chatbot">
+    <div class="chatbot-header">TravelBot</div>
+    <div class="chatbot-body" id="chatBody">
+      <p><strong>Bot:</strong> Hello! How can I help you plan your trip today?</p>
+    </div>
+    <div class="chatbot-footer">
+      <input type="text" id="chatInput" placeholder="Type a message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const transportPrices = {
+      bus: 200,
+      train: 300,
+      plane: 500
+    };
+
+    const destinationMultiplier = {
+      paris: 1.2,
+      newyork: 1.5,
+      tokyo: 1.3
+    };
+
+    function calculatePrice() {
+      const transport = document.getElementById('transport').value;
+      const destination = document.getElementById('destination').value;
+      const travelers = parseInt(document.getElementById('travelers').value);
+
+      if (!transport || !destination || travelers < 1) {
+        alert("Please select transport, destination and number of travelers.");
+        return;
+      }
+
+      const base = transportPrices[transport] * destinationMultiplier[destination] * travelers;
+      const tax = base * 0.18;
+      const total = base + tax;
+
+      document.getElementById('basePrice').innerText = `Base Price: $${base.toFixed(2)}`;
+      document.getElementById('taxes').innerText = `Taxes (18%): $${tax.toFixed(2)}`;
+      document.getElementById('totalPrice').innerText = `Total: $${total.toFixed(2)}`;
+
+      document.getElementById('priceSection').style.display = 'block';
+    }
+
+    function goToSuggestions() {
+      const destination = document.getElementById('destination').value;
+      if (!destination) {
+        alert("Please select a destination first.");
+        return;
+      }
+
+      const suggestionText = {
+        paris: [
+          "Visit the Louvre Museum",
+          "Cruise on the Seine River",
+          "See the Eiffel Tower light show"
+        ],
+        newyork: [
+          "Explore Central Park",
+          "Visit Times Square",
+          "See a Broadway show"
+        ],
+        tokyo: [
+          "Experience Shibuya Crossing",
+          "Visit Sensoji Temple",
+          "Enjoy sushi at Tsukiji Market"
+        ]
+      };
+
+      const page = window.open("", "_blank");
+      page.document.write(`
+        <html>
+        <head>
+          <title>Suggestions</title>
+          <style>
+            body { font-family: Arial; background: #fffde7; padding: 20px; }
+            h2 { color: #0077cc; }
+            ul { padding-left: 20px; }
+            li { margin: 10px 0; }
+          </style>
+        </head>
+        <body>
+          <h2>Top Things To Do in ${destination.toUpperCase()}</h2>
+          <ul>
+            ${suggestionText[destination].map(item => `<li>${item}</li>`).join('')}
+          </ul>
+        </body>
+        </html>
+      `);
+    }
+
+    function toggleChatbot() {
+      const bot = document.getElementById('chatbot');
+      bot.style.display = bot.style.display === 'none' || bot.style.display === '' ? 'flex' : 'none';
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const chatBody = document.getElementById('chatBody');
+      const msg = input.value.trim();
+      if (msg === '') return;
+
+      const userMsg = document.createElement('p');
+      userMsg.innerHTML = `<strong>You:</strong> ${msg}`;
+      chatBody.appendChild(userMsg);
+
+      const botReply = document.createElement('p');
+      botReply.innerHTML = `<strong>Bot:</strong> ${generateBotReply(msg)}`;
+      chatBody.appendChild(botReply);
+
+      input.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function generateBotReply(message) {
+      message = message.toLowerCase();
+      if (message.includes("price")) return "Please use the form to calculate your total trip cost.";
+      if (message.includes("destination")) return "You can choose Paris, New York or Tokyo as destinations.";
+      if (message.includes("transport")) return "We offer Bus, Train, and Airplane transport options.";
+      return "I'm here to help! Try asking about transport, destination, or pricing.";
+    }
+  </script>
+</body>
+</html>
